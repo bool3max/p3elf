@@ -10,7 +10,7 @@ HEADER_FIELDS_DESC = {
     'EI_CLASS': ((0x04, 0x04), (1, 1)), # byte class, i.e. 32bit or 64bit
     'EI_DATA': ((0x05, 0x05), (1, 1)), # endianness, 1: little, 2:big,
     'EI_VERSION': ((0x06, 0x06), (1, 1)), # always 1
-    'EI_OSABI': ((0x07, 0x07), (1, 1)), # underlying OSABI, usually 0 regardless of actual platform,
+    'EI_OSABI': ((0x07, 0x07), (1, 1)), # underlying OS ABI, usually 0 regardless of actual platform,
     'EI_ABIVERSION': ((0x08, 0x08), (1, 1)), # ABI version, interpretation depends on platform,
     'EI_PAD': ((0x09, 0x09), (7, 7)), # unused, filled with 0s,
     'EI_OBJTYPE': ((0x10, 0x10), (2, 2)), # object file type,
@@ -28,6 +28,7 @@ HEADER_FIELDS_DESC = {
     'EI_SHSTRNDX': ((0x32, 0x3e), (2, 2)) # index of the section header table entry that contains the section names
 }
 
+# describes offset, size, and field name of every field in the ELF program header
 PROGHEADER_FIELDS_DESC = {
     'P_TYPE': ((0x0, 0x0), (4, 4)),
     'P_FLAGS': ((None, 0x4), (None, 4)),
@@ -38,6 +39,21 @@ PROGHEADER_FIELDS_DESC = {
     'P_MEMSZ': ((0x14, 0x28), (4, 8)),
     'P_FLAGS1': ((0x18, None), (4, None)),
     'P_ALIGN': ((0x1c, 0x30), (4, 8))
+}
+
+P_TYPE = {
+    'PT_NULL': 0x0,
+    'PT_LOAD': 0x1,
+    'PT_DYNAMIC': 0x2,
+    'PT_INTERP': 0x3,
+    'PT_NOTE': 0x4,
+    'PT_SHLIB': 0x5,
+    'PT_PHDR': 0x6,
+    'PT_TLS': 0x7,
+    'PT_LOOS': 0x60000000,
+    'PT_HIOS': 0x6FFFFFFF,
+    'PT_LOPROC': 0x70000000,
+    'PT_HIPROC': 0x7FFFFFFF
 }
 
 # underlying OS ABI
@@ -63,7 +79,7 @@ EI_OSABI = {
 }
 
 # object file type (no idea what this means)
-E_TYPE = {
+EI_OBJTYPE = {
     'ET_NONE'       : 0x0,
     'ET_REL'        : 0x1,
     'ET_EXEC'       : 0x2,
@@ -77,7 +93,7 @@ E_TYPE = {
 
 # target ISA (has lots of values, will only include x86, amd64, various arms, and powerpc)
 
-E_MACHINE = {
+EI_MACHINE = {
     'x86'    : 0x03,
     'amd64'  : 0x3e,
     'IA_64'  : 0x32,

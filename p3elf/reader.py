@@ -4,6 +4,13 @@ from pathlib import Path, PurePath
 from . import consts
 from .misc import *
 
+def find_key(d, val):
+    # find a key from the corresponding value in a dictionary
+    for k, v in d.items():
+        if v == val:
+            return k
+    return None
+
 class ELFBase:
     """ Base class representing a single ELF file. Initialzing an instance of it sets up the path, opens the file for reading, extracts basic byteclass-independant information (endianness, byteclass).
     """
@@ -42,10 +49,25 @@ class ELFBase:
         self._reader.close()
 
 class ELFReader(ELFBase):
+    header_tuple_fields = ['EI_OSABI', 'EI_MACHINE', 'EI_OBJTYPE'] # header fields that are returned as tuples because they also have a string representation (i.e. EI_MACHINE, where 0x3e corresponds to 'amd64')
+    progheader_tuple_fileds = ['P_TYPE']
+
     def get_header_field(self, field):
         """ Parse a single entry out of the program header and return its value as an integer """
         self._reader.seek(consts.HEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.HEADER_FIELDS_DESC[field][0][1])
-        return int.from_bytes(self._reader.read(consts.HEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.HEADER_FIELDS_DESC[field][1][1]), self.endianness)
+        num_val = int.from_bytes(self._reader.read(consts.HEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.HEADER_FIELDS_DESC[field][1][1]), self.endianness)
+
+        # modules are not subscriptable so I cannot automatically query the appropriate dictionary from "consts" (i.e. consts['EI_OSABI']), unless I import them into this namespace, which I don't want to do
+        # so I have to test for each tuple-returning field individually
+        if field == 'EI_OSABI':
+             return num_val, find_key(consts.EI_OSABI, num_val)
+        elif field == 'EI_MACHINE':
+             return num_val, find_key(consts.EI_MACHINE, num_val)
+        elif field == 'EI_OBJTYPE':
+             return num_val, find_key(consts.EI_OBJTYPE, num_val)
+        else:
+            return num_val
+
     def get_header(self):
         """ Parse the entirety of the ELF header and return a dictionary with all the appropriate fields. 
             The byteclass and the endianness are saved as attributes of the class instance object once it is initialized, but are also provided in the dict returned by this method
@@ -58,6 +80,11 @@ class ELFReader(ELFBase):
 
         self._reader.seek(self.get_header_field('EI_PHOFF')) # seek reader to start of program header
         self._reader.seek(consts.PROGHEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][0][1], 1) # seek to offset of requested field
-        return int.from_bytes(self._reader.read(consts.PROGHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][1][1]), self.endianness)
+        num_val =  int.from_bytes(self._reader.read(consts.PROGHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][1][1]), self.endianness)
+
+        if field == "P_TYPE":
+            return num_val, find_key(consts.P_TYPE ,num_val)
+
+        return num_val
     def get_progheader(self):
         return {f: self.get_progheader_field(f) for f in consts.PROGHEADER_FIELDS_DESC}
