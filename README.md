@@ -5,7 +5,7 @@ A tiny python3 module for parsing ELF file metadata that I'm writing to familiar
 Currently has the ability to read the Header as well as the Program Header.
 
 ## TODO
-    * add ability to parse various section headers
-    * cli tool
-    * publish on pip for fun (familiarize myself with setuptools etc.)
-    * library docs?
+* add ability to parse various section headers
+* cli tool
+* publish on pip for fun (familiarize myself with setuptools etc.)
+* library docs?
