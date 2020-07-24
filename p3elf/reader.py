@@ -5,7 +5,7 @@ from . import consts
 from .misc import *
 
 def find_key(d, val):
-    # find a key from the corresponding value in a dictionary
+    # find a dict key corresponding to the requested value (if there are more keys with the same value, the first matching one is returned)
     for k, v in d.items():
         if v == val:
             return k
@@ -74,6 +74,10 @@ class ELFReader(ELFBase):
         """
         return {f: self.get_header_field(f) for f in consts.HEADER_FIELDS_DESC}
     def get_progheader_field(self, field):
+        # fetch a specific field from the program header - if no program header exist in the ELF file, an appropriate exception is raised
+        if self.get_header_field('EI_PHNUM') == 0:
+            raise NoSection(f"Number of program headers in file: 0")
+
         if (field == 'P_FLAGS' and self.byteclass == 32) or (field == 'P_FLAGS1' and self.byteclass == 64):
             # P_FLAGS doesn't exist on 32bit ELF files and P_FLAGS1 doesn't exist on 64bit ones
             return None
@@ -88,3 +92,13 @@ class ELFReader(ELFBase):
         return num_val
     def get_progheader(self):
         return {f: self.get_progheader_field(f) for f in consts.PROGHEADER_FIELDS_DESC}
+
+    def get_sectionheader_field(self, field):
+        # fetch a specific field from the section header - if no section header exist in the ELF file, an appropriate exception is raised
+        if self.get_header_field('EI_SHNUM') == 0:
+            raise NoSection(f"Number of section headers in file: 0")
+        # seek reader to the start of the section header table
+        shoff = self.get_header_field('EI_SHOFF')
+        self._reader.seek(shoff)
+
+

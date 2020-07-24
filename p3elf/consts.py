@@ -20,11 +20,11 @@ HEADER_FIELDS_DESC = {
     'EI_PHOFF': ((0x1c, 0x20), (4, 8)), # pointer to start of the program header table
     'EI_SHOFF': ((0x20, 0x28), (4, 8)), # pointer to start of the section header table,
     'EI_FLAGS': ((0x24, 0x30), (4, 4)), # interpretation depends on the target arch,
-    'EI_EHSIZE': ((0x28, 0x34), (2, 2)), # size of this header,
-    'EI_PHENTSIZE': ((0x2a, 0x36), (2, 2)), # size of the program header table,
-    'EI_PHNUM': ((0x2c, 0x38), (2, 2)), # number of entires in the program header table,
-    'EI_SHENTSIZE': ((0x2e, 0x3a), (2, 2)), # size of the section header table
-    'EI_SHNUM': ((0x30, 0x3c), (2, 2)), # number of entrires in the scetion header table,
+    'EI_EHSIZE': ((0x28, 0x34), (2, 2)), # size of this header (ELF file header -- known in advance but provided for ease of use),
+    'EI_PHENTSIZE': ((0x2a, 0x36), (2, 2)), # size of each program header,
+    'EI_PHNUM': ((0x2c, 0x38), (2, 2)), # number of entries in the program header table,
+    'EI_SHENTSIZE': ((0x2e, 0x3a), (2, 2)), # size of each section header,
+    'EI_SHNUM': ((0x30, 0x3c), (2, 2)), # number of section headers,
     'EI_SHSTRNDX': ((0x32, 0x3e), (2, 2)) # index of the section header table entry that contains the section names
 }
 

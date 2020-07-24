@@ -11,3 +11,6 @@ class InvalidFileFormat(p3elfError):
         else:
             self.message = f"Expected '{expected}', got '{got}'"
         super(p3elfError, self).__init__(self.message)
+
+class NoSection(p3elfError):
+    pass
