@@ -4,13 +4,6 @@ from pathlib import Path, PurePath
 from . import consts
 from .misc import *
 
-def find_key(d, val):
-    # find a dict key corresponding to the requested value (if there are more keys with the same value, the first matching one is returned)
-    for k, v in d.items():
-        if v == val:
-            return k
-    return None
-
 class ELFBase:
     """ Base class representing a single ELF file. Initialzing an instance of it sets up the path, opens the file for reading, extracts basic byteclass-independant information (endianness, byteclass).
     """
@@ -73,16 +66,19 @@ class ELFReader(ELFBase):
             The byteclass and the endianness are saved as attributes of the class instance object once it is initialized, but are also provided in the dict returned by this method
         """
         return {f: self.get_header_field(f) for f in consts.HEADER_FIELDS_DESC}
-    def get_progheader_field(self, field):
-        # fetch a specific field from the program header - if no program header exist in the ELF file, an appropriate exception is raised
-        if self.get_header_field('EI_PHNUM') == 0:
-            raise NoSection(f"Number of program headers in file: 0")
+    def get_progheader_field(self, field, index=0):
+        # fetch a specific field from the program header - if no program headers exist at the specified index, raise an appropriate exception
+        num_pheaders = self.get_header_field('EI_PHNUM') # the total number of program headers in the file
+        phsize = self.get_header_field('EI_PHENTSIZE') # the size of each program header
+
+        if num_pheaders == 0 or (index > (num_pheaders - 1) or index < 0):
+            raise NoSection(f"No program header found at index {index}")
 
         if (field == 'P_FLAGS' and self.byteclass == 32) or (field == 'P_FLAGS1' and self.byteclass == 64):
             # P_FLAGS doesn't exist on 32bit ELF files and P_FLAGS1 doesn't exist on 64bit ones
             return None
 
-        self._reader.seek(self.get_header_field('EI_PHOFF')) # seek reader to start of program header
+        self._reader.seek(self.get_header_field('EI_PHOFF') + (index * phsize)) # seek reader to start of program header
         self._reader.seek(consts.PROGHEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][0][1], 1) # seek to offset of requested field
         num_val =  int.from_bytes(self._reader.read(consts.PROGHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][1][1]), self.endianness)
 
@@ -90,8 +86,8 @@ class ELFReader(ELFBase):
             return num_val, find_key(consts.P_TYPE ,num_val)
 
         return num_val
-    def get_progheader(self):
-        return {f: self.get_progheader_field(f) for f in consts.PROGHEADER_FIELDS_DESC}
+    def get_progheader(self, index=0):
+        return {f: self.get_progheader_field(f, index) for f in consts.PROGHEADER_FIELDS_DESC}
 
     def get_sectionheader_field(self, field):
         # fetch a specific field from the section header - if no section header exist in the ELF file, an appropriate exception is raised

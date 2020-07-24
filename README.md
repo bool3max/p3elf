@@ -8,4 +8,4 @@ Currently has the ability to read the Header as well as the Program Header.
 * add ability to parse various section headers
 * cli tool
 * publish on pip for fun (familiarize myself with setuptools etc.)
-* library docs?
+* parse flag fields from the progheader into human-readable strings (just as `readelf` does)
