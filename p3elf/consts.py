@@ -30,11 +30,11 @@ HEADER_FIELDS_DESC = {
 
 # describes offset, size, and field name of every field in the ELF program header
 PROGHEADER_FIELDS_DESC = {
-    'P_TYPE': ((0x0, 0x0), (4, 4)),
-    'P_FLAGS': ((None, 0x4), (None, 4)),
-    'P_OFFSET': ((0x04, 0x08), (4, 8)),
+    'P_TYPE': ((0x0, 0x0), (4, 4)), # type of segment that this program header complements
+    'P_FLAGS': ((None, 0x4), (None, 4)), 
+    'P_OFFSET': ((0x04, 0x08), (4, 8)), # offset to the segment that this particular program header describes
     'P_VADDR': ((0x08, 0x10), (4, 8)),
-    'P_ADDR': ((0x0c, 0x18), (4, 8)),
+    'P_ADDR': ((0x0c, 0x18), (4, 8)), # the size of the segment that this particular program header describes
     'P_FILESZ': ((0x10, 0x20), (4, 8)),
     'P_MEMSZ': ((0x14, 0x28), (4, 8)),
     'P_FLAGS1': ((0x18, None), (4, None)),

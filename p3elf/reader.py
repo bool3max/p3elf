@@ -37,6 +37,8 @@ class ELFBase:
         # previous read coincidentally seeked us to the next byte
         self.endianness = 'little' if int.from_bytes(self._reader.read(1), 'little') == 1 else 'big'
 
+        self._reader.seek(0, 0)
+
     def __del__(self):
         # close the open fd when the object is deleted
         self._reader.close()
@@ -78,9 +80,13 @@ class ELFReader(ELFBase):
             # P_FLAGS doesn't exist on 32bit ELF files and P_FLAGS1 doesn't exist on 64bit ones
             return None
 
+        _tell = self._reader.tell()
+
         self._reader.seek(self.get_header_field('EI_PHOFF') + (index * phsize)) # seek reader to start of program header
         self._reader.seek(consts.PROGHEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][0][1], 1) # seek to offset of requested field
         num_val =  int.from_bytes(self._reader.read(consts.PROGHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][1][1]), self.endianness)
+
+        self._reader.seek(_tell, 0)
 
         if field == "P_TYPE":
             return num_val, find_key(consts.P_TYPE ,num_val)
@@ -88,13 +94,3 @@ class ELFReader(ELFBase):
         return num_val
     def get_progheader(self, index=0):
         return {f: self.get_progheader_field(f, index) for f in consts.PROGHEADER_FIELDS_DESC}
-
-    def get_sectionheader_field(self, field):
-        # fetch a specific field from the section header - if no section header exist in the ELF file, an appropriate exception is raised
-        if self.get_header_field('EI_SHNUM') == 0:
-            raise NoSection(f"Number of section headers in file: 0")
-        # seek reader to the start of the section header table
-        shoff = self.get_header_field('EI_SHOFF')
-        self._reader.seek(shoff)
-
-
