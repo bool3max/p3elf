@@ -49,11 +49,13 @@ class ELFReader(ELFBase):
 
     def get_header_field(self, field):
         """ Parse a single entry out of the program header and return its value as an integer """
+        _tell = self._reader.tell()
         self._reader.seek(consts.HEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.HEADER_FIELDS_DESC[field][0][1])
         num_val = int.from_bytes(self._reader.read(consts.HEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.HEADER_FIELDS_DESC[field][1][1]), self.endianness)
 
         # modules are not subscriptable so I cannot automatically query the appropriate dictionary from "consts" (i.e. consts['EI_OSABI']), unless I import them into this namespace, which I don't want to do
         # so I have to test for each tuple-returning field individually
+        self._reader.seek(_tell, 0)
         if field == 'EI_OSABI':
              return num_val, find_key(consts.EI_OSABI, num_val)
         elif field == 'EI_MACHINE':
@@ -94,3 +96,15 @@ class ELFReader(ELFBase):
         return num_val
     def get_progheader(self, index=0):
         return {f: self.get_progheader_field(f, index) for f in consts.PROGHEADER_FIELDS_DESC}
+    def dump_raw_segment(self, progheader_index):
+        """Return a bytes object representing the entire segment associated with the program header at the specified index"""
+        _tell = self._reader.tell()
+
+        self._reader.seek(self.get_progheader_field('P_OFFSET', progheader_index), 0)
+        filesz = self.get_progheader_field('P_FILESZ', progheader_index)
+
+        data = self._reader.read(self.get_progheader_field('P_FILESZ', progheader_index))
+
+        self._reader.seek(_tell, 0)
+        return data
+
