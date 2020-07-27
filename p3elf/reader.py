@@ -45,7 +45,7 @@ class ELFBase:
 
 class ELFReader(ELFBase):
     header_tuple_fields = ['EI_OSABI', 'EI_MACHINE', 'EI_OBJTYPE'] # header fields that are returned as tuples because they also have a string representation (i.e. EI_MACHINE, where 0x3e corresponds to 'amd64')
-    progheader_tuple_fileds = ['P_TYPE']
+    progheader_tuple_fields = ['P_TYPE']
 
     def get_header_field(self, field):
         """ Parse a single entry out of the program header and return its value as an integer """
@@ -56,14 +56,11 @@ class ELFReader(ELFBase):
         # modules are not subscriptable so I cannot automatically query the appropriate dictionary from "consts" (i.e. consts['EI_OSABI']), unless I import them into this namespace, which I don't want to do
         # so I have to test for each tuple-returning field individually
         self._reader.seek(_tell, 0)
-        if field == 'EI_OSABI':
-             return num_val, find_key(consts.EI_OSABI, num_val)
-        elif field == 'EI_MACHINE':
-             return num_val, find_key(consts.EI_MACHINE, num_val)
-        elif field == 'EI_OBJTYPE':
-             return num_val, find_key(consts.EI_OBJTYPE, num_val)
-        else:
-            return num_val
+
+        if field in ELFReader.header_tuple_fields:
+            return num_val, find_key(getattr(consts, field), num_val)
+
+        return num_val
 
     def get_header(self):
         """ Parse the entirety of the ELF header and return a dictionary with all the appropriate fields. 
@@ -90,8 +87,8 @@ class ELFReader(ELFBase):
 
         self._reader.seek(_tell, 0)
 
-        if field == "P_TYPE":
-            return num_val, find_key(consts.P_TYPE ,num_val)
+        if field in ELFReader.progheader_tuple_fields:
+            return num_val, find_key(getattr(consts, field), num_val)
 
         return num_val
     def get_progheader(self, index=0):
