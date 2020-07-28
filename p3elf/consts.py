@@ -103,3 +103,38 @@ EI_MACHINE = {
     'PowerPC': 0x14,
     'PowerPC64': 0x15
 }
+
+SECTHEADER_FIELDS_DESC = {
+    'SH_NAME': ((0x0, 0x0), (4, 4)), # an offset to a string in the .shstrtab section that describes the name of this particular section
+    'SH_TYPE': ((0x04, 0x04), (4, 4)),
+    'SH_FLAGS': ((0x08, 0x08), (4, 8)),
+    'SH_ADDR': ((0x0c, 0x10), (4, 8)),
+    'SH_OFFSET': ((0x10, 0x18), (4, 8)),
+    'SH_SIZE': ((0x14, 0x20), (4, 8)),
+    'SH_LINK': ((0x18, 0x28), (4, 4)),
+    'SH_INFO': ((0x1c, 0x2c), (4, 4)),
+    'SH_ADDRALIGN': ((0x20, 0x30), (4, 8)),
+    'SH_ENTSIZE': ((0x24, 0x38), (4, 8))
+}
+
+SH_TYPE = {
+    'SHT_NULL': 0x0,
+    'SHT_PROGBITS': 0x1,
+    'SHT_SYMTAB': 0x2,
+    'SHT_STRTAB': 0x3,
+    'SHT_RELA': 0x4,
+    'SHT_HAS': 0x5,
+    'SHT_DYNAMIC': 0x6,
+    'SHT_NOTE': 0x7,
+    'SHT_NOBITS': 0x8,
+    'SHT_REL': 0x9,
+    'SHT_SHLIB': 0x0a,
+    'SHT_DYNSYM': 0x0b,
+    'SHT_INIT_ARRAY': 0x0e,
+    'SHT_FINI_ARRAY': 0x0f,
+    'SHT_PREINIT_ARRAY': 0x10,
+    'SHT_GROUP': 0x11,
+    'SHT_SYMTAB_SHNDX': 0x12,
+    'SHT_NUM': 0x13,
+    'SHT_LOOS': 0x60000000
+}

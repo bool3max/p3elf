@@ -33,7 +33,7 @@ class ELFBase:
 
         self._reader.seek(consts.HEADER_FIELDS_DESC['EI_CLASS'][0][0]) # offset is same on 32bit and 64bit
 
-        self.byteclass  = 32 if int.from_bytes(self._reader.read(1), 'little') == 1 else 64
+        self.byteclass = 32 if int.from_bytes(self._reader.read(1), 'little') == 1 else 64
         # previous read coincidentally seeked us to the next byte
         self.endianness = 'little' if int.from_bytes(self._reader.read(1), 'little') == 1 else 'big'
 
@@ -45,7 +45,8 @@ class ELFBase:
 
 class ELFReader(ELFBase):
     header_tuple_fields = ['EI_OSABI', 'EI_MACHINE', 'EI_OBJTYPE'] # header fields that are returned as tuples because they also have a string representation (i.e. EI_MACHINE, where 0x3e corresponds to 'amd64')
-    progheader_tuple_fields = ['P_TYPE']
+    progheader_tuple_fields = ['P_TYPE']                           # ...
+    sectheader_tuple_fields = ['SH_TYPE']                          # ...
 
     def get_header_field(self, field):
         """ Parse a single entry out of the program header and return its value as an integer """
@@ -83,7 +84,7 @@ class ELFReader(ELFBase):
 
         self._reader.seek(self.get_header_field('EI_PHOFF') + (index * phsize)) # seek reader to start of program header
         self._reader.seek(consts.PROGHEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][0][1], 1) # seek to offset of requested field
-        num_val =  int.from_bytes(self._reader.read(consts.PROGHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][1][1]), self.endianness)
+        num_val = int.from_bytes(self._reader.read(consts.PROGHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.PROGHEADER_FIELDS_DESC[field][1][1]), self.endianness)
 
         self._reader.seek(_tell, 0)
 
@@ -91,10 +92,49 @@ class ELFReader(ELFBase):
             return num_val, find_key(getattr(consts, field), num_val)
 
         return num_val
+
     def get_progheader(self, index=0):
         return {f: self.get_progheader_field(f, index) for f in consts.PROGHEADER_FIELDS_DESC}
-    def dump_raw_segment(self, progheader_index):
-        """Return a bytes object representing the entire segment associated with the program header at the specified index"""
+
+    def get_sectionheader_field(self, field, index=0):
+        # get a field of a particular section header
+        num_sectheaders = self.get_header_field('EI_SHNUM')
+        sectheader_size = self.get_header_field('EI_SHENTSIZE')
+
+        if (index > (num_sectheaders - 1)) or index < 0:
+            raise NoSection(f"No section header found at index {index}")
+
+        _tell = self._reader.tell()
+
+        self._reader.seek(self.get_header_field('EI_SHOFF') + (index * sectheader_size), 0)
+        self._reader.seek(consts.SECTHEADER_FIELDS_DESC[field][0][0] if self.byteclass == 32 else consts.SECTHEADER_FIELDS_DESC[field][0][1], 1) # seek to offset of requested field
+        num_val = int.from_bytes(self._reader.read(consts.SECTHEADER_FIELDS_DESC[field][1][0] if self.byteclass == 32 else consts.SECTHEADER_FIELDS_DESC[field][1][1]), self.endianness)
+
+        ret_val = None
+
+        if field in ELFReader.sectheader_tuple_fields:
+            ret_val = num_val, find_key(getattr(consts, field), num_val)
+        elif field == "SH_NAME":
+            # SH_NAME is actually a 4byte offset to a string in the .shstrtab section that represents the name of the current section
+            self._reader.seek(self.get_sectionheader_field('SH_OFFSET', self.get_header_field('EI_SHSTRNDX')) + num_val, 0) 
+            name = bytes()
+            t = self._reader.read(1)
+            while int.from_bytes(t, self.endianness) != 0x0:
+                name += t
+                t = self._reader.read(1)
+            ret_val = num_val, name.decode('utf8')
+        else:
+            ret_val = num_val
+
+        self._reader.seek(_tell, 0)
+        return ret_val
+
+    def get_sectionheader(self, index=0):
+        # PARSE AND AND . NAME OF SECTION TO THIS DICT!!!!!!!!!
+        return {f: self.get_sectionheader_field(f, index) for f in consts.SECTHEADER_FIELDS_DESC}
+
+    def get_raw_segment(self, progheader_index):
+        """Return a bytes object containing the entire segment associated with the program header at the specified index"""
         _tell = self._reader.tell()
 
         self._reader.seek(self.get_progheader_field('P_OFFSET', progheader_index), 0)
@@ -105,3 +145,7 @@ class ELFReader(ELFBase):
         self._reader.seek(_tell, 0)
         return data
 
+    @property
+    def n_segments(self):
+        # getter for returning the number of segments (and consequently, the number of program headers)
+        return self.get_header_field('EI_PHNUM')
