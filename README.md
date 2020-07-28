@@ -4,11 +4,11 @@ A tiny python3 module for parsing ELF file metadata that I'm writing to familiar
 
 Currently, it can: 
 
-    * parse the ELF file header
+* parse the ELF file header
 
-    * parse all program headers
+* parse all program headers
 
-    * dump segments
+* dump segments
 
 ## TODO
 * publish on pip for fun (familiarize myself with setuptools etc.)
