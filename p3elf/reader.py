@@ -119,6 +119,7 @@ class ELFReader(ELFBase):
             self._reader.seek(self.get_sectionheader_field('SH_OFFSET', self.get_header_field('EI_SHSTRNDX')) + num_val, 0) 
             name = bytes()
             t = self._reader.read(1)
+            # the strings aren't of a fixed size, rather they're null terminated (indicated by the fact that the SH_ENTSIZE field of the SHT_STRTAB section header is 0x0)
             while int.from_bytes(t, self.endianness) != 0x0:
                 name += t
                 t = self._reader.read(1)
@@ -130,7 +131,6 @@ class ELFReader(ELFBase):
         return ret_val
 
     def get_sectionheader(self, index=0):
-        # PARSE AND AND . NAME OF SECTION TO THIS DICT!!!!!!!!!
         return {f: self.get_sectionheader_field(f, index) for f in consts.SECTHEADER_FIELDS_DESC}
 
     def get_raw_segment(self, progheader_index):
@@ -144,8 +144,24 @@ class ELFReader(ELFBase):
 
         self._reader.seek(_tell, 0)
         return data
+    def get_section(self, name):
+        """Return a bytes ojbect representing the content of a section"""
+        _tell = self._reader.tell()
+        
+        index_match = None
 
-    @property
-    def n_segments(self):
-        # getter for returning the number of segments (and consequently, the number of program headers)
-        return self.get_header_field('EI_PHNUM')
+        for i in range(0, self.get_header_field("EI_SHNUM")):
+            if self.get_sectionheader_field('SH_NAME', i)[1] == name:
+                index_match = i
+                break
+
+        if not index_match:
+            raise NoSection
+        
+        header = self.get_sectionheader(index_match)
+        self._reader.seek(header['SH_OFFSET'], 0)
+        
+        data = self._reader.read(header['SH_SIZE'])
+        self._reader.seek(_tell, 0)
+
+        return data

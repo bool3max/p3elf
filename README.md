@@ -6,9 +6,11 @@ Currently, it can:
 
 * parse the ELF file header
 
-* parse all program headers
+* parse program headers and section headers
 
 * dump segments
+
+* dump sections
 
 ## TODO
 * publish on pip for fun (familiarize myself with setuptools etc.)
