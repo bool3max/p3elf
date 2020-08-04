@@ -124,6 +124,14 @@ class ELFReader(ELFBase):
                 name += t
                 t = self._reader.read(1)
             ret_val = num_val, name.decode('utf8')
+        elif field == "SH_FLAGS":
+            flags = []
+            
+            for flag_name, flag_bits in consts.SH_FLAGS.items():
+                if num_val & flag_bits:
+                    flags.append(flag_name)
+
+            ret_val = num_val, flags
         else:
             ret_val = num_val
 
