@@ -157,7 +157,6 @@ class ELFReader(ELFBase):
         _tell = self._reader.tell()
         
         index_match = None
-
         for i in range(0, self.get_header_field("EI_SHNUM")):
             if self.get_sectionheader_field('SH_NAME', i)[1] == name:
                 index_match = i
