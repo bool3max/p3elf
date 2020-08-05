@@ -13,5 +13,4 @@ Currently, it can:
 * dump sections
 
 ## TODO
-* publish on pip for fun (familiarize myself with setuptools etc.)
 * cli tool

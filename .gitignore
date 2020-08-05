@@ -1,2 +1,6 @@
 **/__pycache__
 *.pyc
+build/
+dist/
+p3elf.egg-info/
+UNKNOWN.egg-info/
