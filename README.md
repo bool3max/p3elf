@@ -12,5 +12,21 @@ Currently, it can:
 
 * dump sections
 
+## Installation
+
+`$ pip3 install -U p3elf`
+
+### Basic usage
+
+```python
+
+>>> import p3elf.reader
+>>> elf = p3elf.reader.ELFReader('/bin/bash')
+>>> elf.get_header()['EI_MACHINE']
+
+'amd64'
+```
+
 ## TODO
 * cli tool
+* docs
