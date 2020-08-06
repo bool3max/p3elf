@@ -14,7 +14,9 @@ Currently, it can:
 
 ## Installation
 
-`$ pip3 install -U p3elf`
+```sh
+$ pip3 install -U p3elf
+```
 
 ### Basic usage
 
