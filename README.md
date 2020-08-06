@@ -23,11 +23,9 @@ $ pip3 install -U p3elf
 2. From source
 
 * Clone this repository: 
-
-    `$ git clone https://github.com/bool3max/p3elf`
+    + `$ git clone https://github.com/bool3max/p3elf`
 * Install using `setup.py` as usual
-
-    `$ python3 p3elf/setup.py install`
+    + `$ python3 p3elf/setup.py install`
 
 ### Basic usage
 
