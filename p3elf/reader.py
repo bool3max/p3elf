@@ -146,6 +146,9 @@ class ELFReader(ELFBase):
 
         self._reader.seek(_tell, 0)
         return data
+    def sections(self):
+        """Helper funciton that returns an array of names of all available sections"""
+        return [self.get_sectionheader_field('SH_NAME', i)[1] for i in range(0, self.get_header_field('EI_SHNUM'))]
     def get_section(self, name):
         """Return a bytes ojbect representing the content of a section"""
         _tell = self._reader.tell()
