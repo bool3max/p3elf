@@ -39,6 +39,10 @@ $ pip3 install -U p3elf
 >>> elf.get_header()['EI_MACHINE']
 
 'amd64'
+
+>>> elf.sections()
+
+['', '.interp', '.note.gnu.build-id', '.note.ABI-tag', '.gnu.hash', '.dynsym', '.dynstr', ...]
 ```
 
 ## TODO
