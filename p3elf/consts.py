@@ -34,8 +34,8 @@ PROGHEADER_FIELDS_DESC = {
     'P_FLAGS': ((None, 0x4), (None, 4)), 
     'P_OFFSET': ((0x04, 0x08), (4, 8)), # offset to the segment that this particular program header describes
     'P_VADDR': ((0x08, 0x10), (4, 8)),
-    'P_ADDR': ((0x0c, 0x18), (4, 8)), # the size of the segment that this particular program header describes
-    'P_FILESZ': ((0x10, 0x20), (4, 8)),
+    'P_ADDR': ((0x0c, 0x18), (4, 8)), 
+    'P_FILESZ': ((0x10, 0x20), (4, 8)), # the size of the segment that this particular program header describes
     'P_MEMSZ': ((0x14, 0x28), (4, 8)),
     'P_FLAGS1': ((0x18, None), (4, None)),
     'P_ALIGN': ((0x1c, 0x30), (4, 8))

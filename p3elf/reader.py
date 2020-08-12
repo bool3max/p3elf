@@ -132,8 +132,17 @@ class ELFReader(ELFBase):
         self._reader.seek(_tell, 0)
         return ret_val
 
-    def get_sectionheader(self, index=0):
-        return {f: self.get_sectionheader_field(f, index) for f in consts.SECTHEADER_FIELDS_DESC}
+    def get_sectionheader(self, iden=0):
+        # index can either be a numerical index of the section OR a string denoting the name of a section
+        pass_index = iden
+
+        if isinstance(iden, str):
+            for i in range(0, self.get_header_field('EI_SHNUM')):
+                if self.get_sectionheader_field('SH_NAME', i)[1] == iden:
+                    pass_index = i
+                    break
+
+        return {f: self.get_sectionheader_field(f, pass_index) for f in consts.SECTHEADER_FIELDS_DESC}
 
     def get_raw_segment(self, progheader_index):
         """Return a bytes object containing the entire segment associated with the program header at the specified index"""
@@ -143,7 +152,6 @@ class ELFReader(ELFBase):
         filesz = self.get_progheader_field('P_FILESZ', progheader_index)
 
         data = self._reader.read(self.get_progheader_field('P_FILESZ', progheader_index))
-
         self._reader.seek(_tell, 0)
         return data
     def sections(self):
