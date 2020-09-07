@@ -133,7 +133,7 @@ class ELFReader(ELFBase):
         return ret_val
 
     def get_sectionheader(self, iden=0):
-        # index can either be a numerical index of the section OR a string denoting the name of a section
+        # iden can either be a numerical index of the section OR a string denoting the name of a section
         pass_index = iden
 
         if isinstance(iden, str):
@@ -151,7 +151,7 @@ class ELFReader(ELFBase):
         self._reader.seek(self.get_progheader_field('P_OFFSET', progheader_index), 0)
         filesz = self.get_progheader_field('P_FILESZ', progheader_index)
 
-        data = self._reader.read(self.get_progheader_field('P_FILESZ', progheader_index))
+        data = self._reader.read(filesz)
         self._reader.seek(_tell, 0)
         return data
     def sections(self):
